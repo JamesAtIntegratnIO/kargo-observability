@@ -23,4 +23,10 @@ jobs:
             | tar -xz -C /tmp
           sudo mv "/tmp/prometheus-${ver}.linux-amd64/promtool" /usr/local/bin/
           promtool --version
+          # lint.sh extracts .spec from the PrometheusRule for promtool, which
+          # will not read a CRD. Installed explicitly rather than relied on:
+          # a silently-missing PyYAML makes the check SKIP, and a skipped check
+          # that reads as a pass is the failure mode this chart is about.
+          python3 -c 'import yaml' 2>/dev/null || pip install --quiet pyyaml
+          python3 -c 'import yaml; print("pyyaml", yaml.__version__)'
       - run: hack/lint.sh

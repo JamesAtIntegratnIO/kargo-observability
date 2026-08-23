@@ -36,14 +36,26 @@ python3 -c 'import json,sys; json.load(open("values.schema.json"))' 2>/dev/null 
 # Every alert expression must PARSE. It cannot be checked for a non-empty
 # result here -- that needs a live Prometheus with Kargo running, and the gap
 # between the two is the whole lesson in the README.
-if command -v promtool >/dev/null 2>&1; then
+#
+# promtool wants a bare Prometheus rules file, NOT a PrometheusRule CRD: the
+# `groups:` it reads live under `.spec`, and handing it the whole manifest
+# fails with "field apiVersion not found in type rulefmt.RuleGroups".
+rules_ok=1
+command -v promtool >/dev/null 2>&1 || { echo "  skip  promtool not on PATH (alert expressions unparsed)"; rules_ok=0; }
+if [ "$rules_ok" = 1 ] && ! python3 -c 'import yaml' 2>/dev/null; then
+  echo "  skip  python3 PyYAML missing (cannot extract .spec for promtool)"
+  rules_ok=0
+fi
+if [ "$rules_ok" = 1 ]; then
   helm template lint-check "${lintargs[@]}" . --show-only templates/prometheusrule.yaml \
-    | python3 -c 'import sys,json; d=sys.stdin.read(); open("/tmp/rule.yaml","w").write(d)'
-  if promtool check rules /tmp/rule.yaml >/dev/null 2>&1; then ok "promtool check rules"; else
-    promtool check rules /tmp/rule.yaml 2>&1 | sed 's/^/        /' | head; bad "promtool check rules"
+    | python3 -c 'import sys, yaml; yaml.safe_dump(yaml.safe_load(sys.stdin)["spec"], sys.stdout)' \
+    > /tmp/kargo-rules.yaml
+  if promtool check rules /tmp/kargo-rules.yaml >/dev/null 2>&1; then
+    ok "promtool check rules ($(grep -c '^\s*- alert:' /tmp/kargo-rules.yaml) alerts parse)"
+  else
+    promtool check rules /tmp/kargo-rules.yaml 2>&1 | sed 's/^/        /' | head
+    bad "promtool check rules"
   fi
-else
-  echo "  skip  promtool not on PATH (alert expressions unparsed)"
 fi
 
 echo
