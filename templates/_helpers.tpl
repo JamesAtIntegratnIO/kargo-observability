@@ -10,7 +10,7 @@
 app.kubernetes.io/name: {{ include "kargo-observability.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{/*
+{{- /*
 part-of names what this belongs to, and that is Kargo -- not the delivery kit
 it was written inside. It shares no contract with anything in that kit and now
 ships on its own. `kargo` also matches what the Kargo charts themselves write,

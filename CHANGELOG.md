@@ -3,6 +3,20 @@
 All notable changes to `kargo-observability`. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is semver.
 
+## [0.1.1] - 2026-08-23
+
+### Fixed
+
+- A stray blank line in every object's `labels:` block. The comment explaining
+  `part-of` was written `{{/* ... */}}` rather than `{{- /* ... */}}`, so it
+  emitted the newline it was chomping on. Harmless YAML, visible in all five
+  objects, and caught by diffing the published chart's render against the tree
+  rather than by reading it.
+
+  0.1.0 was already published and the release workflow refuses to overwrite a
+  published version, which is why this is 0.1.1 rather than a re-push. That is
+  the policy working, not getting in the way.
+
 ## [0.1.0] - 2026-08-23
 
 First release from a repository of its own. Written inside
