@@ -94,6 +94,6 @@ It was separated from those deliberately: it shares no contract with either,
 and it is useful to anyone running Kargo whether or not they want a gate or an
 agent.
 
-The licences differ for the same reason. Bosun is PolyForm **Noncommercial** —
-nobody profits from it but its author. This is PolyForm **Internal Use** —
-anyone may profit *using* it, nobody may profit *from* it.
+Both carry PolyForm **Internal Use**: anyone may profit *using* them, nobody
+may profit *from* them. They are separate repositories because they are
+separate things, not because they are licensed differently.
