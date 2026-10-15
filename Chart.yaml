@@ -2,7 +2,7 @@ apiVersion: v2
 name: kargo-observability
 description: Kargo's own promotion state as Prometheus metrics, with alerts and a dashboard
 type: application
-version: 0.1.1
+version: 0.1.2
 appVersion: "1.11"
 keywords: [kargo, argocd, gitops, observability, promotion]
 home: https://github.com/JamesAtIntegratnIO/kargo-observability

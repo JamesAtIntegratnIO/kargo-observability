@@ -29,7 +29,7 @@ They want different reactions, which is why they are separate alerts.
 | Metric | Type | Labels |
 |---|---|---|
 | `kargo_stage_condition` | Gauge (`1`/`0`/`-1`) | `namespace`, `stage`, `condition`, `reason` |
-| `kargo_stage_last_promotion_phase` | StateSet | `namespace`, `stage`, `phase` |
+| `kargo_stage_last_promotion_phase` | StateSet | `namespace`, `stage`, `promotion`, `phase` |
 | `kargo_stage_verification_phase` | StateSet | `namespace`, `stage`, `phase` |
 | `kargo_stage_current_freight` | Info | `namespace`, `stage`, `freight` |
 
@@ -57,7 +57,7 @@ found.
 
 | Metric | Type | Labels |
 |---|---|---|
-| `kargo_freight_discovered` | Gauge (unix time) | `namespace`, `warehouse` |
+| `kargo_freight_discovered` | Gauge (unix time) | `namespace`, `warehouse`, `freight` |
 
 Age since last discovery:
 
@@ -75,9 +75,13 @@ Two decisions follow:
 - Phase is a `StateSet`, not one `Info` series per promotion. `count by (stage,
   phase)` then costs the same whether there have been fifty promotions or fifty
   thousand.
-- `kargo_freight_discovered` carries no freight name. There is one series per
-  warehouse rather than one per freight object, which is the difference between
-  bounded and unbounded growth.
+- `kargo_freight_discovered` carries the freight name. It did not until 0.1.2,
+  on the theory of one series per warehouse; but kube-state-metrics emits one
+  sample per *object*, so every Freight of a warehouse produced the same label
+  set and Prometheus dropped all but one per scrape (`PrometheusDuplicateTimestamps`),
+  keeping an arbitrary one. Growth is bounded by Kargo's Freight garbage
+  collection, and `max by (namespace, warehouse)` still gives one value per
+  warehouse.
 
 `kargo_promotion_phase` and `kargo_promotion_created` do carry a `promotion`
 label, and are therefore the two series that grow with history. If that becomes
