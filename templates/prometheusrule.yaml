@@ -19,8 +19,14 @@ spec:
         # Errored is Kargo's "the step could not run" -- a credential, a network
         # fault, a path that no longer resolves. Distinct from Failed, which
         # means the pipeline ran and did not get what it wanted.
+        #
+        # Both alert on the Stage's LAST promotion, not on every Promotion
+        # object: those persist after a later attempt succeeds, so a
+        # per-object alert kept firing for stages that had already recovered
+        # (38 of 98 in one install). kargo_promotion_phase keeps the history
+        # for the dashboard.
         - alert: KargoPromotionErrored
-          expr: {{ $p }}_promotion_phase{phase="Errored"} == 1
+          expr: {{ $p }}_stage_last_promotion_phase{phase="Errored"} == 1
           for: {{ $r.promotionErrored.for }}
           labels:
             severity: {{ $r.promotionErrored.severity }}
@@ -37,7 +43,7 @@ spec:
 {{- end }}
 {{- if $r.promotionFailed.enabled }}
         - alert: KargoPromotionFailed
-          expr: {{ $p }}_promotion_phase{phase="Failed"} == 1
+          expr: {{ $p }}_stage_last_promotion_phase{phase="Failed"} == 1
           for: {{ $r.promotionFailed.for }}
           labels:
             severity: {{ $r.promotionFailed.severity }}

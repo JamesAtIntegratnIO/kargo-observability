@@ -3,6 +3,22 @@
 All notable changes to `kargo-observability`. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning is semver.
 
+## [0.1.2] - 2026-10-15
+
+### Fixed
+
+- `KargoPromotionErrored` and `KargoPromotionFailed` fired once per Promotion
+  object, and Promotion objects outlive the attempt. A stage that errored and
+  then promoted successfully kept alerting until the old object was garbage
+  collected: on one install 38 of 98 Errored and 16 of 20 Failed alerts were for
+  stages whose latest promotion had succeeded. Both now read
+  `kargo_stage_last_promotion_phase`, which gains a `promotion` label naming the
+  stage's last promotion.
+- `kargo_freight_discovered` gave every Freight of a warehouse the same label
+  set, so Prometheus rejected all but one sample per scrape
+  (`PrometheusDuplicateTimestamps`, ~900 warnings in 7.5h with 41 Freight) and
+  kept an arbitrary one. It now carries a `freight` label.
+
 ## [0.1.1] - 2026-08-23
 
 ### Fixed

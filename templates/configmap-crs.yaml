@@ -79,6 +79,10 @@ data:
               # 1/0/-1 automatically for Gauge.
             - name: {{ $p }}_stage_last_promotion_phase
               help: "Phase of the most recent Promotion into this Stage."
+              # Names the promotion, so an alert on this series can say which
+              # one without falling back to the per-object history below.
+              labelsFromPath:
+                promotion: [status, lastPromotion, name]
               each:
                 type: StateSet
                 stateSet:
@@ -138,8 +142,11 @@ data:
                     freight: [status, lastFreightID]
 
         # ---------------------------------------------------------------
-        # Freight -- discoveredAt drives warehouse staleness. Deliberately
-        # no per-freight name label: 41 objects today and only growing.
+        # Freight -- discoveredAt drives warehouse staleness. Carries the
+        # freight name: without it every Freight of a warehouse emitted the
+        # same label set, and Prometheus rejected all but one per scrape
+        # (PrometheusDuplicateTimestamps), keeping an arbitrary one. Bounded
+        # by Kargo's own Freight garbage collection, like Promotions.
         # ---------------------------------------------------------------
         - groupVersionKind:
             group: kargo.akuity.io
@@ -153,6 +160,7 @@ data:
           labelsFromPath:
             namespace: [metadata, namespace]
             warehouse: [origin, name]
+            freight: [metadata, name]
           metrics:
             - name: {{ $p }}_freight_discovered
               help: "Unix time at which a Freight was discovered."

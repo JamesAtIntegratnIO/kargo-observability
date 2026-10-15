@@ -5,8 +5,8 @@ so you can tune without forking. All carry `component: kargo`.
 
 | Alert | Default | Fires when |
 |---|---|---|
-| `KargoPromotionErrored` | warning, 15m | A step could not run — credential, network, unresolvable path. |
-| `KargoPromotionFailed` | warning, 15m | The pipeline ran and did not get what it wanted. |
+| `KargoPromotionErrored` | warning, 15m | A stage's latest promotion could not run — credential, network, unresolvable path. |
+| `KargoPromotionFailed` | warning, 15m | A stage's latest promotion ran and did not get what it wanted. |
 | `KargoPromotionRunningLong` | warning, 24h | A promotion has been `Running` for a day. |
 | `KargoVerificationFailed` | warning, 5m | Post-promotion verification reported `Failed` or `Error`. |
 | `KargoStageNotVerified` | warning, 30m | A stage sits at `Verified=False`. |
